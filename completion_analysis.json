@@ -493,7 +493,7 @@
     "student": "bismark",
     "completed": 14,
     "remaining": 8,
-    "total_files": 28,
+    "total_files": 29,
     "completion_rate": 63.6,
     "assignment_numbers": [
       1,
@@ -529,6 +529,7 @@
       "bismarktitanic_clean.ipynb",
       "bismark_final.ipynb",
       "Bismark9.ipynb",
+      "Bismark27.ipynb",
       "Bismark21/password_vault/__init__.py",
       "Bismark21/password_vault/cli.py",
       "Bismark21/password_vault/vault.py",
