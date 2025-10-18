@@ -43,7 +43,7 @@ class ProfessionalDashboard {
     async loadData() {
         try {
             // Try to load from completion_analysis.json first
-            const response = await fetch('./completion_analysis.json');
+            const response = await fetch('completion_analysis.json');
             if (!response.ok) {
                 throw new Error('JSON file not found');
             }
@@ -56,7 +56,7 @@ class ProfessionalDashboard {
 
     async loadCSVData() {
         try {
-            const response = await fetch('./completion_analysis.csv');
+            const response = await fetch('completion_analysis.csv');
             if (!response.ok) {
                 throw new Error('CSV file not found');
             }

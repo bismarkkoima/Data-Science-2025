@@ -1,0 +1,78 @@
+name: Update Dashboard Data
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run completion analysis
+        run: |
+          echo "Running analyze_completion.py..."
+          if [ -f analyze_completion.py ]; then
+            python3 analyze_completion.py || echo "analyze_completion.py failed or not found"
+          else
+            echo "analyze_completion.py not found, skipping."
+          fi
+
+      - name: Update dashboard data
+        run: |
+          echo "Running update_dashboard.py..."
+          if [ -f update_dashboard.py ]; then
+            python3 update_dashboard.py || echo "update_dashboard.py failed"
+          else
+            echo "update_dashboard.py not found, skipping."
+          fi
+
+      - name: Create update log
+        run: |
+          echo "Logging update details..."
+          echo "Update Timestamp: $(date '+%Y-%m-%d %H:%M:%S')" > update_log.txt
+          echo "Branch: $GITHUB_REF_NAME" >> update_log.txt
+          echo "Commit SHA: $GITHUB_SHA" >> update_log.txt
+          echo "Updated by GitHub Actions" >> update_log.txt
+
+      - name: List updated files
+        run: |
+          echo "Files updated:"
+          ls -R dashboard || echo "dashboard folder not found"
+
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add completion_analysis.csv completion_analysis.json dashboard/*.json dashboard/*.csv dashboard/README.md dashboard/deploy.sh update_log.txt || true
+
+          if git diff --cached --quiet; then
+            echo "No new changes to commit"
+          else
+            git commit -m "Auto-update dashboard data ($(date +'%Y-%m-%d %H:%M:%S'))"
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git main
+            echo "Dashboard data pushed successfully"
+          fi
